@@ -58,7 +58,7 @@ int main(int argc, char* argv[])
         cout << "\n--> ";
         cin >> input;
 
-        if(input > 0 && input <= 4)
+        if(input > 0 && input <= 8)
         {
             schedChoice = input;
         }
@@ -118,7 +118,12 @@ int main(int argc, char* argv[])
                 procIdx = HighestResponseRatioNext(curTime,procList);
                 break;
             //Modified Highest Response Ratio Next
+            case 5:
                 procIdx = Modified_HRRN(curTime,procList);
+                break;
+            //First in First Out
+            case 6:
+                procIdx = FIFO(curTime,procList);
                 break;
         }
 

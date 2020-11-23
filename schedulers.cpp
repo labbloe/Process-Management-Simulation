@@ -305,3 +305,32 @@ int Modified_HRRN(const int& curTime,const vector<Process>& procList)
     return idx;
 
 }
+
+int FIFO(const int& curTime, const vector<Process>& procList)
+{
+    static deque<int> ready; //queue of process that are ready to be scheduled
+    int idx = -1;
+
+    //add process to queue if the startTime of that process is equal to the current time
+    for(int i = 0, i_end = procList.size(); i < i_end; ++i)
+    {
+        if(procList[i].startTime == curTime)
+        {
+            ready.push_back(i);
+            //cout<<"size: "<<ready.size()<<"\n";
+        }
+        
+    }
+
+    if(ready.size() > 0)
+    {
+        if(procList[ready[0]].isDone)
+            ready.pop_front();
+        idx = ready[0];         //set idx to next process
+    }
+    // if the ready queue has no processes on it send back invalid index to represent empty queue
+    else
+        idx = -1;   
+
+    return idx;    
+}

@@ -66,4 +66,8 @@ float responseRatio(const int& curTime,const Process& proc);
 //preemptive
 int Modified_HRRN(const int& curTime,const vector<Process>& procList);
 
+//First in First Out scheduling algorithm
+//non-preemptive
+int FIFO(const int& curTime, const vector<Process>& procList);
+
 #endif
