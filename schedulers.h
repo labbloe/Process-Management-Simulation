@@ -70,4 +70,10 @@ int Modified_HRRN(const int& curTime,const vector<Process>& procList);
 //non-preemptive
 int FIFO(const int& curTime, const vector<Process>& procList);
 
+//Multilevel Queue scheduling algorithm
+int MultilevelQueue(const int& curTime, const vector<Process>& procList);
+
+//Multilevel Feedback Queue scheduling algorithm
+int MultilevelFeedbackQueue(const int& curTime, const vector<Process>& procList);
+
 #endif

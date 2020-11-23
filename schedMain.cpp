@@ -125,6 +125,14 @@ int main(int argc, char* argv[])
             case 6:
                 procIdx = FIFO(curTime,procList);
                 break;
+            //Multilevel Queue
+            case 7:
+                procIdx = MultilevelQueue(curTime,procList);
+                break;
+            //Multilevel Feedback Queue
+            case 8:
+                procIdx = MultilevelFeedbackQueue(curTime,procList);
+                break;
         }
 
         //if we were given a valid process index
