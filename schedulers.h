@@ -5,7 +5,6 @@
 #include<deque>   //for ready double ended queue
 #include<fstream>  // file i/o
 #include<iostream> // cerr
-#include<algorithm> //swap
 #include<stdlib.h>
 #include<time.h>
 
@@ -70,6 +69,9 @@ double getResponseRatio(const int & curTime, const Process & process);
 //Modified Highest response ratio next algorithm
 //preemptive
 int Modified_HRRN(const int& curTime,const vector<Process>& procList);
+
+//return double representing the modified response ration of the given process
+double getModifiedResponseRatio(const int & curTime, const Process & process);
 
 //First in First Out scheduling algorithm
 //non-preemptive

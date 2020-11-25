@@ -3,6 +3,17 @@
 void quickSort(int arr[], int low, int high); 
 int partition (int arr[], int low, int high);
 
+void swap(int* a, int* b)  
+{  
+    int t = *a;  
+    *a = *b;  
+    *b = t;  
+}  
+
+/* The main function that implements QuickSort  
+arr[] --> Array to be sorted,  
+low --> Starting index,  
+high --> Ending index */
 void quickSort(int arr[], int low, int high)  
 {  
     if (low < high)  
@@ -18,6 +29,11 @@ void quickSort(int arr[], int low, int high)
     }  
 }  
 
+/* This function takes last element as pivot, places  
+the pivot element at its correct position in sorted  
+array, and places all smaller (smaller than pivot)  
+to left of pivot and all greater elements to right  
+of pivot */
 int partition (int arr[], int low, int high)  
 {  
     int pivot = arr[high]; // pivot  
@@ -29,10 +45,10 @@ int partition (int arr[], int low, int high)
         if (arr[j] < pivot)  
         {  
             i++; // increment index of smaller element  
-            swap(arr[i], arr[j]);  
+            swap(&arr[i], &arr[j]);  
         }  
     }  
-    swap(arr[i + 1], arr[high]);  
+    swap(&arr[i + 1], &arr[high]);  
     return (i + 1);  
 }  
 
@@ -201,33 +217,55 @@ double getResponseRatio(const int & curTime, const Process & process)
     return ((waitTime + burstTime) / burstTime);
 }
 
+//Modified Highest Response Ratio Next scheduling algorithm. The process with the highest response ratio and priority is
+//ran first. Normal HRRN already accounts for indefinite postponement and starvation, but is not normally suitable for
+//a priority based system. This algorithm not only accounts for the response ratio, but also the processes's priority
+//when scheduling. High priority has a '0' bit, and low priority has a '1' bit.
 int Modified_HRRN(const int& curTime,const vector<Process>& procList)
 {
-    static deque<int> ready; //queue of process that are ready to be scheduled
+    static deque<int> ready; //keeps track of the processes that are ready to be scheduled
     int idx = -1;
-
-    //add process to queue if the startTime of that process is equal to the current time
-    for(int i = 0, i_end = procList.size(); i < i_end; ++i)
-    {
+   
+    //add to queue on arrival
+    for(unsigned int i = 0; i < procList.size(); i++)
         if(procList[i].startTime == curTime)
-        {
             ready.push_back(i);
-            //cout<<"size: "<<ready.size()<<"\n";
-        }
-        
+
+    //remove done processes and resort
+    if((procList[ready[0]].isDone) || (curTime == 0))
+    {
+        if(curTime != 0)
+            ready.pop_front();
+        for(unsigned int i = 0; i < ready.size() - 1; i++) //simple bubble sort
+            for(unsigned int j = 0; j < ready.size() - i - 1; j++)
+                if(getModifiedResponseRatio(curTime, procList[ready[j]]) < getModifiedResponseRatio(curTime, procList[ready[j + 1]]))
+                    swap(ready[j], ready[j + 1]);
+        if (ready.size() > 1)
+            if (getModifiedResponseRatio(curTime, procList[ready[0]]) == getModifiedResponseRatio(curTime, procList[ready[1]])) //if same swap by arrival time
+                if (procList[ready[0]].startTime > procList[ready[1]].startTime)
+                    swap(ready[0], ready[1]);
     }
-
     if(ready.size() > 0)
-        idx = ready[0];         //set idx to next process
-
-    // if the ready queue has no processes on it send back invalid index to represent empty queue
-    else
-        idx = -1;   
-
+        idx = ready[0];   
     return idx;
 
 }
 
+//Priority = 0.5 * Priority + 0.5 * Ratio
+double getModifiedResponseRatio(const int & curTime, const Process & process)
+{
+    double waitTime = curTime - process.startTime;
+    double burstTime = process.totalTimeNeeded;
+    double ratio = ((waitTime + burstTime) / burstTime);
+    int priority;
+    if(process.priority == 0)
+        priority = 1;
+    else
+        priority = 0;
+    return ((0.5 * priority) + (0.5 * ratio));
+}
+
+//First in First out scheduling algorithm. Non-preemptive
 int FIFO(const int& curTime, const vector<Process>& procList)
 {
     static deque<int> ready; //queue of process that are ready to be scheduled
