@@ -5,6 +5,7 @@
 #include<deque>   //for ready double ended queue
 #include<fstream>  // file i/o
 #include<iostream> // cerr
+#include<algorithm> //swap
 
 using namespace std;
 
@@ -21,6 +22,7 @@ struct Process
     // Process details
     bool isDone;          //Indicates if the process is complete
     int timeScheduled;    //The amount of time the process has been scheduled so far
+    int quantumTime;      //time spent on priority quantum
     int timeFinished;     //The time that the process completed
 };
 
@@ -60,8 +62,8 @@ int ShortestRemainingTime(const int& curTime,const vector<Process>& procList);
 //non-preemptive: allows a running process to continue until the process terminates or blocks on a resource
 int HighestResponseRatioNext(const int& curTime,const vector<Process>& procList);
 
-//returns float representing the response ratio of the given process
-float responseRatio(const int& curTime,const Process& proc);
+//returns double representing the response ratio of the given process
+double getResponseRatio(const int & curTime, const Process & process);
 
 //Modified Highest response ratio next algorithm
 //preemptive
@@ -75,6 +77,6 @@ int FIFO(const int& curTime, const vector<Process>& procList);
 int MultilevelQueue(const int& curTime, const vector<Process>& procList, const int& timeQuantum);
 
 //Multilevel Feedback Queue scheduling algorithm
-int MultilevelFeedbackQueue(const int& curTime, const vector<Process>& procList, const int& timeQuantum);
+int MultilevelFeedbackQueue(const int& curTime, vector<Process>& procList, const int& timeQuantum,const int& highQuantum, const int&lowQuantum);
 
 #endif

@@ -1,5 +1,42 @@
 #include "schedulers.h"
 
+void quickSort(int arr[], int low, int high); 
+int partition (int arr[], int low, int high);
+
+void quickSort(int arr[], int low, int high)  
+{  
+    if (low < high)  
+    {  
+        /* pi is partitioning index, arr[p] is now  
+        at right place */
+        int pi = partition(arr, low, high);  
+  
+        // Separately sort elements before  
+        // partition and after partition  
+        quickSort(arr, low, pi - 1);  
+        quickSort(arr, pi + 1, high);  
+    }  
+}  
+
+int partition (int arr[], int low, int high)  
+{  
+    int pivot = arr[high]; // pivot  
+    int i = (low - 1); // Index of smaller element  
+  
+    for (int j = low; j <= high - 1; j++)  
+    {  
+        // If current element is smaller than the pivot  
+        if (arr[j] < pivot)  
+        {  
+            i++; // increment index of smaller element  
+            swap(arr[i], arr[j]);  
+        }  
+    }  
+    swap(arr[i + 1], arr[high]);  
+    return (i + 1);  
+}  
+
+
 //Round Robin scheduler implementation. In general, this function maintains a double ended queue
 //of processes that are candidates for scheduling (the ready variable) and always schedules
 //the first process on that list, if available (i.e., if the list has members)
@@ -65,62 +102,30 @@ int RoundRobin(const int& curTime, const vector<Process>& procList, const int& t
 //the shortest process next in the queue. This algorithm in non-preemptive.
 int ShortestProcessNext(const int& curTime, const vector<Process>& procList)
 {
-    static deque<int> ready; //queue of process that are ready to be scheduled
+    static deque<int> ready; //keeps track of the processes that are ready to be scheduled
     int idx = -1;
-
-    //add process to queue if the startTime of that process is equal to the current time
-    for(int i = 0, i_end = procList.size(); i < i_end; ++i)
-    {
+    //add to queue on arrival
+    for(unsigned int i = 0; i < procList.size(); i++)
         if(procList[i].startTime == curTime)
-        {
             ready.push_back(i);
-            //cout<<"size: "<<ready.size()<<"\n";
-        }
-        
-    }
 
-    //If current process is done remove from queue, and select next process with shortest time needed
-    if(procList[ready[0]].isDone)
+    //remove done and resort
+    if((procList[ready[0]].isDone) || (curTime == 0))
     {
-        ready.pop_front();
-        for(int i=1, i_end = ready.size(); i < i_end; ++i)
-        {
-            if(ready.size() == 0)
-                break;
-            //re-organize queue in order of shortest time needed
-            if(procList[ready[0]].totalTimeNeeded > procList[ready[i]].totalTimeNeeded)
-            {
-                int temp2 = ready[0];
-                ready.pop_front();
-                ready.push_back(temp2);
-                i = 0;
-            }
-            //If two processes have the same processing time, then the process with 
-            //the earlier startTime should be ordered first in the queue
-            if(procList[ready[0]].totalTimeNeeded == procList[ready[i]].totalTimeNeeded)
-            {
-                if(procList[ready[0]].startTime > procList[ready[i]].startTime)
-                {
-                    int temp2 = ready[0];
-                    ready.pop_front();
-                    ready.push_back(temp2);
-                    i = 0;
-                }
-            }
-            /*for(int j=0; j< ready.size(); ++j)
-                cout<<procList[ready[j]].id<<" ";
-            cout<<"\n";*/
-        }
+        if(curTime != 0)
+            ready.pop_front();
+        for(unsigned int i = 0; i < ready.size() - 1; i++) //bubble sort to order queue
+            for(unsigned int j = 0; j < ready.size() - i - 1; j++)
+                if(procList[ready[j]].totalTimeNeeded > procList[ready[j + 1]].totalTimeNeeded)
+                    swap(ready[j], ready[j + 1]);
+        if (ready.size() > 1) //if same swap by arrival time
+            if (procList[ready[0]].totalTimeNeeded == procList[ready[1]].totalTimeNeeded)
+                if (procList[ready[0]].startTime > procList[ready[1]].startTime)
+                    swap(ready[0], ready[1]);
     }
         
     if(ready.size() > 0)
-        idx = ready[0];         //set idx to next process
-
-    // if the ready queue has no processes on it send back invalid index to represent empty queue
-    else
-        idx = -1;   
-    
-    //cout<<"idx: "<<idx<<"\n";
+        idx = ready[0];
 
     return idx;
 }
@@ -130,72 +135,27 @@ int ShortestProcessNext(const int& curTime, const vector<Process>& procList)
 //the process with the shortest remaining execution time left. This algorithm is preemptive.
 int ShortestRemainingTime(const int& curTime,const vector<Process>& procList)
 {
-    static deque<int> ready; //queue of process that are ready to be scheduled
+    static deque<int> ready; //keeps track of the processes that are ready to be scheduled
     int idx = -1;
 
-    if(ready.size() > 0)
-    {
-        if(procList[ready[0]].isDone)
-            ready.pop_front();
-    }
-
-    //add process to queue if the startTime of that process is equal to the current time
-    //if the process that is ready has a shorter processing time than the current process
-    //push it to the front of the queue
-    for(int i = 0, i_end = procList.size(); i < i_end; ++i)
-    {
+    //add to queue on arrival
+    for(unsigned int i = 0; i < procList.size(); i++)
         if(procList[i].startTime == curTime)
-        {
-            if(ready.size() == 0)
-                ready.push_back(i);
-            else if(procList[i].totalTimeNeeded < (procList[ready[0]].totalTimeNeeded - procList[ready[0]].timeScheduled))
-                ready.push_front(i);
-            else if(procList[i].totalTimeNeeded >= (procList[ready[0]].totalTimeNeeded - procList[ready[0]].timeScheduled))
-                ready.push_back(i);
-
-            //cout<<"size: "<<ready.size()<<"\n";
-
-        }
-        
-    }
-                    /*for(int j=0; j< ready.size(); ++j)
-                cout<<procList[ready[j]].id<<" ";
-            cout<<"\n";*/
-
-    //This loop re-organizes the queue. The loop above accounts for pre-emptive functionality, but does
-    //not ensure correct queue order.
-    for(int i=1, i_end = ready.size(); i < i_end; ++i)
-    {
-        if(ready.size() == 0)
-            break;
-        //re-organize queue in order of shortest time needed/ remaining
-        if((procList[ready[0]].totalTimeNeeded - procList[ready[0]].timeScheduled) > procList[ready[i]].totalTimeNeeded)
-        {
-            //cout<<"HERE\n";
-            int temp = ready[0];
+            ready.push_back(i);
+    //remove done and resort
+        if(procList[ready[0]].isDone && ready.size())
             ready.pop_front();
-            ready.push_back(temp);
-            i = 0;
-        }
-        //If two processes have the same processing time remaining, then the process with 
-        //the earlier startTime should be ordered first in the queue
-        if((procList[ready[0]].totalTimeNeeded - procList[ready[0]].timeScheduled) == procList[ready[i]].totalTimeNeeded)
-        {
-            if(procList[ready[0]].startTime > procList[ready[i]].startTime)
-            {
-                int temp2 = ready[0];
-                ready.pop_front();
-                ready.push_back(temp2);
-                i = 0;
-            }
-        }
-    }
+        for(unsigned int i = 0; i < ready.size() - 1; i++) //bubble sort to order processlist
+            for(unsigned int j = 0; j < ready.size() - i - 1; j++)
+                if(procList[ready[j]].totalTimeNeeded - procList[ready[j]].timeScheduled > procList[ready[j + 1]].totalTimeNeeded - procList[ready[j + 1]].timeScheduled)
+                    swap(ready[j], ready[j + 1]);
+        if (ready.size() > 1) //if same swap by arrival time
+            if (procList[ready[0]].totalTimeNeeded - procList[ready[0]].timeScheduled == procList[ready[1]].totalTimeNeeded - procList[ready[1]].timeScheduled)
+                if (procList[ready[0]].startTime > procList[ready[1]].startTime)
+                    swap(ready[0], ready[1]);
+        
     if(ready.size() > 0)
-        idx = ready[0];         //set idx to next process
-
-    // if the ready queue has no processes on it send back invalid index to represent empty queue
-    else
-        idx = -1;   
+        idx = ready[0];
 
     return idx;
 }
@@ -207,76 +167,38 @@ int ShortestRemainingTime(const int& curTime,const vector<Process>& procList)
 
 int HighestResponseRatioNext(const int& curTime,const vector<Process>& procList)
 {
-    static deque<int> ready; //queue of process that are ready to be scheduled
+    static deque<int> ready; //keeps track of the processes that are ready to be scheduled
     int idx = -1;
-
-    //add process to queue if the startTime of that process is equal to the current time
-    for(int i = 0, i_end = procList.size(); i < i_end; ++i)
-    {
+   
+    //add to queue on arrival
+    for(unsigned int i = 0; i < procList.size(); i++)
         if(procList[i].startTime == curTime)
-        {
             ready.push_back(i);
-            //cout<<"size: "<<ready.size()<<"\n";
-        }
-        
-    }
 
-    //organize processes by response ratio in the queue
-    if(procList[ready[0]].isDone)
+    //remove done processes and resort
+    if((procList[ready[0]].isDone) || (curTime == 0))
     {
-        ready.pop_front();
-        for(int i=1, i_end = ready.size(); i < i_end; ++i)
-        {
-            if(ready.size() == 0) //prevent core dump
-                break;
-
-            //cout<<"ID: "<<procList[ready[i]].id<<"  curTime: "<<curTime;
-            //cout<<"  RR: "<<responseRatio(curTime,procList[ready[i]])<<"      ";
-            //sort by highest response ratio
-            if(responseRatio(curTime,procList[ready[0]]) < responseRatio(curTime,procList[ready[i]]))
-            {
-                //cout<<"HERE\n";
-                int temp = ready[0];
-                ready.pop_front();
-                ready.push_back(temp);
-                i = 0;
-            }
-            //If two processes have the same response ratio
-            //the earlier startTime should be ordered first in the queue
-            if(responseRatio(curTime,procList[ready[0]]) == responseRatio(curTime,procList[ready[i]]))
-            {
-                if(procList[ready[0]].startTime > procList[ready[i]].startTime)
-                {
-                    int temp2 = ready[0];
-                    ready.pop_front();
-                    ready.push_back(temp2);
-                    i = 0;
-                }
-            }
-                                /*for(int j=0; j< ready.size(); ++j)
-                cout<<procList[ready[j]].id<<" ";
-            cout<<"\n";*/
-        }
+        if(curTime != 0)
+            ready.pop_front();
+        for(unsigned int i = 0; i < ready.size() - 1; i++) //simple bubble sort
+            for(unsigned int j = 0; j < ready.size() - i - 1; j++)
+                if(getResponseRatio(curTime, procList[ready[j]]) < getResponseRatio(curTime, procList[ready[j + 1]]))
+                    swap(ready[j], ready[j + 1]);
+        if (ready.size() > 1)
+            if (getResponseRatio(curTime, procList[ready[0]]) == getResponseRatio(curTime, procList[ready[1]])) //if same swap by arrival time
+                if (procList[ready[0]].startTime > procList[ready[1]].startTime)
+                    swap(ready[0], ready[1]);
     }
-
-
     if(ready.size() > 0)
-        idx = ready[0];         //set idx to next process
-
-    // if the ready queue has no processes on it send back invalid index to represent empty queue
-    else
-        idx = -1;   
-
+        idx = ready[0];   
     return idx;
 }
 
-float responseRatio(const int& curTime,const Process& proc)
+double getResponseRatio(const int & curTime, const Process & process)
 {
-    float waitTime = curTime - proc.startTime;
-    float burstTime = proc.totalTimeNeeded;
-
-    float respRatio = (waitTime + burstTime) / burstTime;
-    return respRatio;
+    double waitTime = curTime - process.startTime;
+    double burstTime = process.totalTimeNeeded;
+    return ((waitTime + burstTime) / burstTime);
 }
 
 int Modified_HRRN(const int& curTime,const vector<Process>& procList)
@@ -437,31 +359,124 @@ int MultilevelQueue(const int& curTime, const vector<Process>& procList,const in
     return idx;       
 }
 
-int MultilevelFeedbackQueue(const int& curTime, const vector<Process>& procList,const int& timeQuantum)
+//Multilevel Feedback Queue allows a process to move between queues. This is based on the CPU burst of the process.
+//If a process uses too much CPU time, it will be moved to a lower-priority queue.
+//Additionally, if a process waits too long in a lower-priority queus, it can be moved to a high-priority queue. 
+//This will prevent the problem of starvation that exists in Mulilevel Queue scheduling. 
+
+//Like before, high priority will be represented by the bit '0' and high priority is represented by a '1'
+//This is a simplified version as there are multiple levels of priority in a real system.
+
+//For this simulation, a process's CPU burst time will have a random amount of time added to it (by no more than 20)
+//This will represent the realistic possibility that a program takes much longer than its estimated burst time.
+//The user can give a "Switch Time" for both the high-priority and low-priority queus. This time is another
+//time quantum. The seperate switch times allow the user to specify longer wait times before switching queues
+//for both high and low priority processes.
+
+//High priority will retain a Round Robin algorithm and low priority will keep a FIFO algorithm for completion.
+int MultilevelFeedbackQueue(const int& curTime, vector<Process>& procList,const int& timeQuantum,const int& highQuantum, const int&lowQuantum)
 {
+    static int timeToNextSched = timeQuantum;  //keeps track of when we should actually schedule a new process
     static deque<int> ready; //queue of process that are ready to be scheduled
+    static deque<int> foreground; //queue of foreground processes
+    static deque<int> background; //queue of background processes
+    bool queueChange = false;     //Marks the need for a queue change based on priority quantums
     int idx = -1;
 
     //add process to queue if the startTime of that process is equal to the current time
+    //if the process that is ready has a larger priority (smaller number) than the following process
+    //push it to the front of the queue
     for(int i = 0, i_end = procList.size(); i < i_end; ++i)
     {
-        if(procList[i].startTime == curTime)
+        if((procList[i].startTime == curTime) || (queueChange == true))
         {
-            ready.push_back(i);
-            //cout<<"size: "<<ready.size()<<"\n";
+            if(procList[i].priority == 0)
+            {
+                if(foreground.size() == 0)
+                    foreground.push_back(i);
+                else if(procList[i].priority < procList[foreground[0]].priority)
+                    foreground.push_front(i);
+                else if(procList[i].priority >= procList[foreground[0]].priority)
+                    foreground.push_back(i);
+            }
+             else
+            {
+                if(background.size() == 0)
+                    background.push_back(i);
+                else if(procList[i].priority < procList[background[0]].priority)
+                    background.push_front(i);
+                else if(procList[i].priority >= procList[background[0]].priority)
+                    background.push_back(i);
+            }
         }
-        
     }
-
-    if(ready.size() > 0)
+    if(foreground.size() > 0)
     {
-        if(procList[ready[0]].isDone)
-            ready.pop_front();
-        idx = ready[0];         //set idx to next process
+        if(!procList[foreground[0]].isDone)
+        {
+            if((procList[foreground[0]].quantumTime % highQuantum == 0) && (procList[foreground[0]].quantumTime != 0))
+            {
+                procList[foreground[0]].quantumTime = 0;
+                background.push_back(foreground[0]); //move to lower queue
+                foreground.pop_front(); //remove from high-priority queue
+            }
+        }
     }
-    // if the ready queue has no processes on it send back invalid index to represent empty queue
-    else
-        idx = -1;   
+    if(background.size() > 0)
+    {
+        if(!procList[background[0]].isDone)
+        {
+            if((procList[background[0]].quantumTime % lowQuantum == 0) && (procList[background[0]].quantumTime != 0))
+            {
+                procList[background[0]].quantumTime = 0;
+                foreground.push_back(background[0]); //move to higher queue
+                background.pop_front(); //remove from low-priority queue
+            }
+        }
+    }
 
-    return idx;      
+    //FOREGROUND PROCESSES (HIGH PRIORITY ROUND ROBIN ALGORITHM)
+    if(foreground.size() > 0)
+    {
+        if((timeToNextSched == 0) || (procList[foreground[0]].isDone))
+        {
+            if(!procList[foreground[0]].isDone)
+            {
+                foreground.push_back(foreground[0]);
+            }
+            foreground.pop_front();
+            timeToNextSched = timeQuantum;
+        }
+        // if the ready queue has any processes on it
+        if(foreground.size() > 0)
+        {
+            // grab the front process and decrement the time to next scheduling
+            idx = foreground[0];
+            --timeToNextSched;
+            return idx;
+        }
+        // if the ready queue has no processes on it
+        else
+        {
+            // send back an invalid process index and set the time to next scheduling
+            // value so that we try again next time step
+            idx = -1;
+            timeToNextSched = 0;
+            if(background.size() > 0)
+                idx = background[0];
+        }
+    }
+
+    //BACKGROUND PROCESSES (LOW PRIORITY FIRST IN FIRST OUT ALGORITHM)
+    else
+    {
+        if(procList[background[0]].isDone)
+            background.pop_front();
+        idx = background[0];         //set idx to next process       
+    }
+
+    if(background.size() == 0 && foreground.size() == 0)
+        idx = -1;
+
+    return idx;        
 }

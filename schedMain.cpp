@@ -17,7 +17,7 @@ int main(int argc, char* argv[])
     string fname;
     chrono::duration<int, std::milli> sleepTime = chrono::milliseconds(500);
     vector<Process> procList;
-    int curTime = 0, input, schedChoice, numProc, procIdx, timeQuantum;
+    int curTime = 0, input, schedChoice, numProc, procIdx, timeQuantum, highQuantum, lowQuantum;
     bool done;
     string tempStr;
 
@@ -73,6 +73,13 @@ int main(int argc, char* argv[])
     {
         cout << "Enter the time quantum you would like to use: ";
         cin >> timeQuantum;
+    }
+    if(schedChoice == 8)
+    {
+        cout << "Enter the high-priority switch time quantum: ";
+        cin >> highQuantum;
+        cout << "Enter the low-priority switch time quantum: ";
+        cin >> lowQuantum;
     }
     
     //output the header for the run table
@@ -131,7 +138,7 @@ int main(int argc, char* argv[])
                 break;
             //Multilevel Feedback Queue
             case 8:
-                procIdx = MultilevelFeedbackQueue(curTime,procList,timeQuantum);
+                procIdx = MultilevelFeedbackQueue(curTime,procList,timeQuantum,highQuantum,lowQuantum);
                 break;
         }
 
@@ -140,6 +147,7 @@ int main(int argc, char* argv[])
         {
             //update the details for the scheduled process
             ++procList[procIdx].timeScheduled;
+            ++procList[procIdx].quantumTime;
             if(procList[procIdx].totalTimeNeeded == procList[procIdx].timeScheduled)
             {
                 procList[procIdx].isDone = true;
