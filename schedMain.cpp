@@ -69,7 +69,7 @@ int main(int argc, char* argv[])
     } while (schedChoice == -1);
     
     //if the scheduler selected needs a time quantum, ask for it
-    if(schedChoice == 1)
+    if((schedChoice == 1) || (schedChoice >= 7))
     {
         cout << "Enter the time quantum you would like to use: ";
         cin >> timeQuantum;
@@ -127,11 +127,11 @@ int main(int argc, char* argv[])
                 break;
             //Multilevel Queue
             case 7:
-                procIdx = MultilevelQueue(curTime,procList);
+                procIdx = MultilevelQueue(curTime,procList,timeQuantum);
                 break;
             //Multilevel Feedback Queue
             case 8:
-                procIdx = MultilevelFeedbackQueue(curTime,procList);
+                procIdx = MultilevelFeedbackQueue(curTime,procList,timeQuantum);
                 break;
         }
 

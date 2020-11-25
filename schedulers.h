@@ -16,6 +16,7 @@ struct Process
     string id;            //The process id
     int startTime;        //The time at which the process becomes available for scheduling
     int totalTimeNeeded;  //The total amount of time needed by the process
+    int priority;         //0-9: 0-4 (high priority foreground process) 5-9 (lower priority background process)
 
     // Process details
     bool isDone;          //Indicates if the process is complete
@@ -39,7 +40,7 @@ inline void readInProcList(const string& fname, vector<Process>& procList)
     procList.resize(numProcs);
     for(auto& p:procList)
     {
-        in >> p.id >> p.startTime >> p.totalTimeNeeded;
+        in >> p.id >> p.startTime >> p.totalTimeNeeded >> p.priority;
     }
     in.close();
 }
@@ -71,9 +72,9 @@ int Modified_HRRN(const int& curTime,const vector<Process>& procList);
 int FIFO(const int& curTime, const vector<Process>& procList);
 
 //Multilevel Queue scheduling algorithm
-int MultilevelQueue(const int& curTime, const vector<Process>& procList);
+int MultilevelQueue(const int& curTime, const vector<Process>& procList, const int& timeQuantum);
 
 //Multilevel Feedback Queue scheduling algorithm
-int MultilevelFeedbackQueue(const int& curTime, const vector<Process>& procList);
+int MultilevelFeedbackQueue(const int& curTime, const vector<Process>& procList, const int& timeQuantum);
 
 #endif

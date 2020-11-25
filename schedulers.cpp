@@ -335,36 +335,103 @@ int FIFO(const int& curTime, const vector<Process>& procList)
     return idx;    
 }
 
-int MultilevelQueue(const int& curTime, const vector<Process>& procList)
+//Multilevel Queue scheduling algorithm partitions the reqdy queue into several separate queues based
+//on some priority such as memory size, process priority, or process type.
+//Each queue will have its own scheduling algorithm
+
+//In this process, each process is given a priority number
+//We will call priority numbers 0-4 (High Priority) foreground processes (System & Interactive Processes)
+//This is due to foreground processes requiring fast response times for good user experience
+//Priority numbers 5-9 (Low Priority) will be called background processes (Batch & Student Processes)
+
+//High priority foreground processes will be scheduled using round robin
+//Low priority background processes will be scheduled using FIFO
+
+//All processes with a higher priority number will preempt any running process with 
+//a lower priority. Note, this does leave the possibility for Starvation!
+int MultilevelQueue(const int& curTime, const vector<Process>& procList,const int& timeQuantum)
 {
+    static int timeToNextSched = timeQuantum;  //keeps track of when we should actually schedule a new process
     static deque<int> ready; //queue of process that are ready to be scheduled
+    static deque<int> foreground; //queue of foreground processes
+    static deque<int> background; //queue of background processes
     int idx = -1;
 
     //add process to queue if the startTime of that process is equal to the current time
+    //if the process that is ready has a larger priority (smaller number) than the following process
+    //push it to the front of the queue
     for(int i = 0, i_end = procList.size(); i < i_end; ++i)
     {
         if(procList[i].startTime == curTime)
         {
-            ready.push_back(i);
-            //cout<<"size: "<<ready.size()<<"\n";
+            if(procList[i].priority < 5)
+            {
+                if(foreground.size() == 0)
+                    foreground.push_back(i);
+                else if(procList[i].priority < procList[foreground[0]].priority)
+                    foreground.push_front(i);
+                else if(procList[i].priority >= procList[foreground[0]].priority)
+                    foreground.push_back(i);
+            }
+            else
+            {
+                if(background.size() == 0)
+                    background.push_back(i);
+                else if(procList[i].priority < procList[background[0]].priority)
+                    background.push_front(i);
+                else if(procList[i].priority >= procList[background[0]].priority)
+                    background.push_back(i);
+            }
         }
-        
     }
 
-    if(ready.size() > 0)
+    //FOREGROUND PROCESSES (HIGH PRIORITY ROUND ROBIN ALGORITHM)
+    if(foreground.size() > 0)
     {
-        if(procList[ready[0]].isDone)
-            ready.pop_front();
-        idx = ready[0];         //set idx to next process
-    }
-    // if the ready queue has no processes on it send back invalid index to represent empty queue
-    else
-        idx = -1;   
+        if(timeToNextSched == 0 || procList[foreground[0]].isDone)
+        {
+            if(!procList[foreground[0]].isDone)
+            {
+                foreground.push_back(foreground[0]);
+            }
+            foreground.pop_front();
+            timeToNextSched = timeQuantum;
+        }
+        // if the ready queue has any processes on it
+        if(foreground.size() > 0)
+        {
+            // grab the front process and decrement the time to next scheduling
+            idx = foreground[0];
+            --timeToNextSched;
+        }
+        // if the ready queue has no processes on it
+        else
+        {
+            // send back an invalid process index and set the time to next scheduling
+            // value so that we try again next time step
+            idx = -1;
+            timeToNextSched = 0;
+        }
 
+        // return back the index of the process to schedule next
+        return idx;
+    }
+
+    //BACKGROUND PROCESSES (LOW PRIORITY FIRST IN FIRST OUT ALGORITHM)
+    else
+    {
+        if(procList[background[0]].isDone)
+            background.pop_front();
+        idx = background[0];         //set idx to next process       
+    }
+
+    if(background.size() == 0 && foreground.size() == 0)
+        idx = -1;
+        
     return idx;       
 }
 
-int MultilevelFeedbackQueue(const int& curTime, const vector<Process>& procList)
+int MultilevelFeedbackQueue(const int& curTime, const vector<Process>& procList,const int& timeQuantum)
 {
     static deque<int> ready; //queue of process that are ready to be scheduled
     int idx = -1;
