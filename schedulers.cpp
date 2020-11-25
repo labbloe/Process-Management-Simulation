@@ -340,9 +340,9 @@ int FIFO(const int& curTime, const vector<Process>& procList)
 //Each queue will have its own scheduling algorithm
 
 //In this process, each process is given a priority number
-//We will call priority numbers 0-4 (High Priority) foreground processes (System & Interactive Processes)
+//We will call priority number 0 (High Priority) foreground processes (System & Interactive Processes)
 //This is due to foreground processes requiring fast response times for good user experience
-//Priority numbers 5-9 (Low Priority) will be called background processes (Batch & Student Processes)
+//Priority numbers 1 (Low Priority) will be called background processes (Batch & Student Processes)
 
 //High priority foreground processes will be scheduled using round robin
 //Low priority background processes will be scheduled using FIFO
@@ -364,7 +364,7 @@ int MultilevelQueue(const int& curTime, const vector<Process>& procList,const in
     {
         if(procList[i].startTime == curTime)
         {
-            if(procList[i].priority < 5)
+            if(procList[i].priority == 0)
             {
                 if(foreground.size() == 0)
                     foreground.push_back(i);
@@ -373,7 +373,7 @@ int MultilevelQueue(const int& curTime, const vector<Process>& procList,const in
                 else if(procList[i].priority >= procList[foreground[0]].priority)
                     foreground.push_back(i);
             }
-            else
+             else
             {
                 if(background.size() == 0)
                     background.push_back(i);
@@ -384,11 +384,18 @@ int MultilevelQueue(const int& curTime, const vector<Process>& procList,const in
             }
         }
     }
+    /*cout<<"Time Remaining: "<<timeToNextSched<<"  ";
+                                    for(int j=0; j< foreground.size(); ++j)
+                cout<<procList[foreground[j]].id<<" ";
+            cout<<"\n";
+                                for(int j=0; j< background.size(); ++j)
+                cout<<procList[background[j]].id<<" ";
+            cout<<"\n";*/
 
     //FOREGROUND PROCESSES (HIGH PRIORITY ROUND ROBIN ALGORITHM)
     if(foreground.size() > 0)
     {
-        if(timeToNextSched == 0 || procList[foreground[0]].isDone)
+        if((timeToNextSched == 0) || (procList[foreground[0]].isDone))
         {
             if(!procList[foreground[0]].isDone)
             {
@@ -403,6 +410,7 @@ int MultilevelQueue(const int& curTime, const vector<Process>& procList,const in
             // grab the front process and decrement the time to next scheduling
             idx = foreground[0];
             --timeToNextSched;
+            return idx;
         }
         // if the ready queue has no processes on it
         else
@@ -411,10 +419,9 @@ int MultilevelQueue(const int& curTime, const vector<Process>& procList,const in
             // value so that we try again next time step
             idx = -1;
             timeToNextSched = 0;
+            if(background.size() > 0)
+                idx = background[0];
         }
-
-        // return back the index of the process to schedule next
-        return idx;
     }
 
     //BACKGROUND PROCESSES (LOW PRIORITY FIRST IN FIRST OUT ALGORITHM)
@@ -427,7 +434,7 @@ int MultilevelQueue(const int& curTime, const vector<Process>& procList,const in
 
     if(background.size() == 0 && foreground.size() == 0)
         idx = -1;
-        
+
     return idx;       
 }
 
