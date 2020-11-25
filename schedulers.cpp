@@ -383,8 +383,7 @@ int MultilevelQueue(const int& curTime, const vector<Process>& procList,const in
                     background.push_back(i);
             }
         }
-    }
-    /*cout<<"Time Remaining: "<<timeToNextSched<<"  ";
+    }/*
                                     for(int j=0; j< foreground.size(); ++j)
                 cout<<procList[foreground[j]].id<<" ";
             cout<<"\n";
