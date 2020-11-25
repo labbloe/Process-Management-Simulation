@@ -6,6 +6,8 @@
 #include<fstream>  // file i/o
 #include<iostream> // cerr
 #include<algorithm> //swap
+#include<stdlib.h>
+#include<time.h>
 
 using namespace std;
 
