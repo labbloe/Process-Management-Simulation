@@ -17,7 +17,7 @@ int main()
     string command = "../program ";
     string procList = "procList";
     string curList;
-    string end = ".txt 1";
+    string end = ".txt 8";
     char c;
     for(int i=0; i<numProcLists; i++)
     {

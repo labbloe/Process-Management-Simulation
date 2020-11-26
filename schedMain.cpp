@@ -85,42 +85,16 @@ int main(int argc, char* argv[])
     if(schedChoice == 8)
     {
         cout << "Enter the high-priority switch time quantum: ";
-        cin >> highQuantum;
+        //cin >> highQuantum;
+        highQuantum = 4;
         cout << "Enter the low-priority switch time quantum: ";
-        cin >> lowQuantum;
+        //cin >> lowQuantum;
+        lowQuantum = 7;
     }
 
-    //ofstream f;
-   // for (int j = 0; j < 5; j++)
-    //{
-      //  this_thread::sleep_for(sleepTime);
         curTime = 0;
         procIdx = -1;
-        /*done = false;
-        remove("procList.txt"); //should delete procList.txt
-        f.open("procList.txt", fstream::out); //should create a brand new procList.txt
-        f << n << endl; //should write a number of n processes and a new line
-        int arrivalTime = 0;
-        int temp = 0;
-        int totalTime = rand() % 10 + 1;
-        f << "p" << 1 << " " << arrivalTime << " " << totalTime << " " << rand() % 2 << endl;
-        for (int i = 1; i < n; i++)
-        {
-            do
-            {
-                temp = arrivalTime;
-                arrivalTime = rand() % (temp + totalTime);
-                if (arrivalTime < temp || arrivalTime > n)
-                {
-                    arrivalTime = temp;
-                }
-            } while (arrivalTime == temp && temp != n);
-            totalTime = rand() % 10 + 1;
-            f << "p" << i + 1 << " " << arrivalTime << " " << totalTime << " " << rand() % 2; //will add processName (pi), arrival time, and length
-            if (i < n - 1)
-                f << endl;
-        }
-        f.close();*/
+
         readInProcList(fname, procList);
         numProc = procList.size();
 
@@ -140,10 +114,6 @@ int main(int argc, char* argv[])
 
         auto start = high_resolution_clock::now();
         //while not all processes have completed:
-       /* for(int i=0; i<numProc; i++)
-        {
-            cout<<procList[i].id << " " << procList[i].startTime << " " << procList[i].totalTimeNeeded << " " << procList[i].priority << endl;
-        }*/
         while(!done)
         {
             //get the process to schedule next using the indicated scheduler
@@ -248,18 +218,7 @@ int main(int argc, char* argv[])
         }
         auto stop = high_resolution_clock::now();
         auto t = duration_cast<microseconds>(stop - start);
-        timeList.push_back(t.count());
-       // procList.clear();
-    //}
-    unsigned long long sum = 0;
-    int average = 0;
-    for (unsigned int i = 0; i < timeList.size(); i++)
-    {
-        sum += timeList[i];
-    }
-    average = sum/100;
-
-    cout << average << endl;
+        auto time = t.count();
 
     //its done! output the run statistics
     cout << "\n\nRun Statistics:\n";
@@ -297,7 +256,7 @@ int main(int argc, char* argv[])
     ofstream output;
     output.open("output.txt",fstream::app);
     //output >> "Input," >> "Turnaround Time," >> "Normalized Turnaround Time," >> "Runtime,\n"
-    output << input << "," << avgTurnAroundTime << "," << avgNormalTurnAroundTime << "," << average << ",\n";
+    output << input << "," << avgTurnAroundTime << "," << avgNormalTurnAroundTime << "," << time << ",\n";
     output.close();
 
     return 0;
