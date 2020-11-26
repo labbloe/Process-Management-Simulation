@@ -124,7 +124,6 @@ int ShortestProcessNext(const int& curTime, const vector<Process>& procList)
     for(unsigned int i = 0; i < procList.size(); i++)
         if(procList[i].startTime == curTime)
             ready.push_back(i);
-
     //remove done and resort
     if((procList[ready[0]].isDone) || (curTime == 0))
     {
@@ -139,6 +138,7 @@ int ShortestProcessNext(const int& curTime, const vector<Process>& procList)
                 if (procList[ready[0]].startTime > procList[ready[1]].startTime)
                     swap(ready[0], ready[1]);
     }
+
         
     if(ready.size() > 0)
         idx = ready[0];
