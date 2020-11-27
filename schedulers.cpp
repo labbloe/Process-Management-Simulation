@@ -437,7 +437,7 @@ int MultilevelFeedbackQueue(const int& curTime, vector<Process>& procList,const 
                     foreground.push_front(i);
                 else if(procList[i].priority >= procList[foreground[0]].priority)
                     foreground.push_back(i);
-                procList[foreground[0]].totalTimeNeeded += (rand() % 20);
+                //procList[foreground[0]].totalTimeNeeded += (rand() % 20);
             }
              else
             {
@@ -447,7 +447,7 @@ int MultilevelFeedbackQueue(const int& curTime, vector<Process>& procList,const 
                     background.push_front(i);
                 else if(procList[i].priority >= procList[background[0]].priority)
                     background.push_back(i);
-                procList[background[0]].totalTimeNeeded += (rand() % 20);
+                //procList[background[0]].totalTimeNeeded += (rand() % 20);
             }
         }
     }
