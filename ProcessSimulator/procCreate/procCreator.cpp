@@ -11,7 +11,7 @@ int main()
     string end = ".txt";
     string fileName = "";
     ofstream f;
-    int n = 10;
+    int n = 500;
     
         for (int i = 0; i < 100; i++)
         {
