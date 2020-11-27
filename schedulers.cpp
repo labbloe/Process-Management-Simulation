@@ -463,12 +463,15 @@ int MultilevelFeedbackQueue(const int& curTime, vector<Process>& procList,const 
             }
         }
     }
+    for(int i=0; i<background.size(); i++)
+        procList[background[i]].waitTime++;
     if(background.size() > 0)
     {
         if(!procList[background[0]].isDone)
         {
-            if((procList[background[0]].quantumTime % lowQuantum == 0) && (procList[background[0]].quantumTime != 0))
+            if((procList[background[0]].waitTime == lowQuantum) && (procList[background[0]].quantumTime != 0))
             {
+                procList[background[0]].waitTime = 0;
                 procList[background[0]].quantumTime = 0;
                 foreground.push_back(background[0]); //move to higher queue
                 background.pop_front(); //remove from low-priority queue

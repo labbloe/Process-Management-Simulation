@@ -25,6 +25,7 @@ struct Process
     int timeScheduled;    //The amount of time the process has been scheduled so far
     int quantumTime;      //time spent on priority quantum
     int timeFinished;     //The time that the process completed
+    int waitTime;         //time process has been waiting to be scheduled
 };
 
 
