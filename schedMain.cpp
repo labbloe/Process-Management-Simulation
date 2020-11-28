@@ -80,16 +80,16 @@ int main(int argc, char* argv[])
     {
         cout << "Enter the time quantum you would like to use: ";
         //cin >> timeQuantum;
-        timeQuantum = 2;
+        timeQuantum = 4;
     }
     if(schedChoice == 8)
     {
         cout << "Enter the high-priority switch time quantum: ";
         //cin >> highQuantum;
-        highQuantum = 5;
+        highQuantum = 7;
         cout << "Enter the low-priority switch time quantum: ";
         //cin >> lowQuantum;
-        lowQuantum = 7;
+        lowQuantum = 13;
     }
 
         curTime = 0;

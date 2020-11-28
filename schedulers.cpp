@@ -262,7 +262,7 @@ double getModifiedResponseRatio(const int & curTime, const Process & process)
         priority = 1;
     else
         priority = 0;
-    return ((0.5 * priority) + (0.5 * ratio));
+    return ((2 * priority) + (0.5 * ratio));
 }
 
 //First in First out scheduling algorithm. Non-preemptive
